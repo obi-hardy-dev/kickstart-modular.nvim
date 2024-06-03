@@ -13,7 +13,7 @@ return {
   dependencies = {
     -- Creates a beautiful debugger UI
     'rcarriga/nvim-dap-ui',
-
+    'theHamsta/nvim-dap-virtual-text',
     -- Required dependency for nvim-dap-ui
     'nvim-neotest/nvim-nio',
 
@@ -23,11 +23,19 @@ return {
 
     -- Add your own debuggers here
     'leoluz/nvim-dap-go',
+    {
+      'mfussenegger/nvim-jdtls',
+      ft = 'java', -- Enable only on .java file extensions
+      dependencies = {
+        'mfussenegger/nvim-dap',
+      },
+    },
   },
   config = function()
     local dap = require 'dap'
     local dapui = require 'dapui'
 
+    require('nvim-dap-virtual-text').setup()
     require('mason-nvim-dap').setup {
       -- Makes a best effort to setup the various debuggers with
       -- reasonable debug configurations
@@ -45,6 +53,10 @@ return {
       },
     }
 
+    --eval under cursor
+    vim.keymap.set('n', '<space>?', function()
+      require('dapui').eval(nil, { enter = true })
+    end)
     -- Basic debugging keymaps, feel free to change to your liking!
     vim.keymap.set('n', '<F5>', dap.continue, { desc = 'Debug: Start/Continue' })
     vim.keymap.set('n', '<F1>', dap.step_into, { desc = 'Debug: Step Into' })
@@ -80,6 +92,9 @@ return {
     -- Toggle to see last session result. Without this, you can't see session output in case of unhandled exception.
     vim.keymap.set('n', '<F7>', dapui.toggle, { desc = 'Debug: See last session result.' })
 
+    dap.listeners.before.attach.dapui_config = function()
+      dapui.open()
+    end
     dap.listeners.after.event_initialized['dapui_config'] = dapui.open
     dap.listeners.before.event_terminated['dapui_config'] = dapui.close
     dap.listeners.before.event_exited['dapui_config'] = dapui.close
@@ -94,3 +109,6 @@ return {
     }
   end,
 }
+
+-- vim: ts=2 sts=2 sw=2 et
+

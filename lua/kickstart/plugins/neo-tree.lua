@@ -15,6 +15,11 @@ return {
   },
   opts = {
     filesystem = {
+      filtered_item = {
+        visible = true,
+        hide_dotfiles = false,
+        hide_gitignored = true,
+      },
       window = {
         mappings = {
           ['\\'] = 'close_window',
@@ -23,3 +28,5 @@ return {
     },
   },
 }
+
+-- vim: ts=2 sts=2 sw=2 et
