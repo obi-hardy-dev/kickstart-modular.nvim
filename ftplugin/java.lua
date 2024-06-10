@@ -7,11 +7,11 @@ local jdtls_home = vim.fn.stdpath 'data' .. '/mine/jdtls'
 local javadebug_home = vim.fn.stdpath 'data' .. '/mine/java-debug/java-debug-0.52.0/com.microsoft.java.debug.plugin/target'
 -- Needed for debugging
 local bundles = {
-  vim.fn.glob(javadebug_home .. '/com.microsoft.java.debug.plugin-0.52.0.jar'),
+  vim.fn.glob(javadebug_home .. '/com.microsoft.java.debug.plugin-0.52.0.jar', true),
 }
 
 -- Needed for running/debugging unit tests
-vim.list_extend(bundles, vim.split(vim.fn.glob(vim.fn.stdpath 'data' .. '/mason/share/java-test/*.jar', 1), '\n'))
+vim.list_extend(bundles, vim.split(vim.fn.glob(vim.fn.stdpath 'data' .. '/mason/share/java-test/*.jar', true), '\n'))
 
 -- See `:help vim.lsp.start_client` for an overview of the supported `config` options.
 local config = {
@@ -51,7 +51,7 @@ local config = {
   settings = {
     java = {
       -- TODO Replace this with the absolute path to your main java version (JDK 17 or higher)
-      home = 'C:/dev/installs/java/jdk-21.0.2',
+      home = 'C:/dev/installs/java/jdk-17.0.2',
       eclipse = {
         downloadSources = true,
       },
@@ -136,9 +136,50 @@ local config = {
   },
 }
 
+function attach_to_debug()
+  local dap = require 'dap'
+  local util = require 'jdtls.util'
+
+  dap.adapters.java = function(callback)
+    util.execute_command({ command = 'vscode.java.startDebugSession' }, function(err0, port)
+      assert(not err0, vim.inspect(err0))
+      callback {
+        type = 'server',
+        host = '127.0.0.1',
+        port = port,
+      }
+    end)
+  end
+  dap.configurations.java = {
+    {
+      name = 'Debug Launch (2GB)',
+      type = 'java',
+      request = 'launch',
+      vmArgs = '' .. '-Xmx2g ',
+    },
+    {
+      name = 'Debug Attach (8000)',
+      type = 'java',
+      request = 'attach',
+      hostName = '127.0.0.1',
+      port = 8000,
+    },
+    {
+      name = 'Debug Attach (5005)',
+      type = 'java',
+      request = 'attach',
+      hostName = '127.0.0.1',
+      port = 5005,
+    },
+  }
+  dap.continue()
+end
+
+vim.keymap.set('n', '<leader>da', ':lua attach_to_debug()<CR>')
+
 -- Needed for debugging
 config['on_attach'] = function(client, bufnr)
-  jdtls.setup_dap { hotcodereplace = 'auto' }
+  require('jdtls').setup_dap { hotcodereplace = 'auto' }
   require('jdtls.dap').setup_dap_main_class_configs()
 end
 

@@ -39,28 +39,18 @@ return {
     --     port = port,
     --   }
     -- end
-    require('lspconfig').jdtls.setup {
 
-      settings = {
-        java = {
-          configuration = {
-            runtimes = {
-              {
-                name = 'JavaSE-21',
-                path = 'C:/dev/installs/java/jdk-21.0.2',
-                default = false,
-              },
-              {
-                name = 'JavaSE-17',
-                path = 'C:/dev/installs/java/jdk-17.0.2',
-                default = true,
-              },
-            },
-          },
-        },
-      },
-    }
-
+    local util = require 'jdtls.util'
+    dap.adapters.java = function(callback)
+      util.execute_command({ command = 'vscode.java.startDebugSession' }, function(err0, port)
+        assert(not err0, vim.inspect(err0))
+        callback {
+          type = 'server',
+          host = '127.0.0.1',
+          port = port,
+        }
+      end)
+    end
     dap.configurations.java = {
       {
         name = 'Debug Launch (2GB)',
@@ -81,6 +71,27 @@ return {
         request = 'attach',
         hostName = '127.0.0.1',
         port = 5005,
+      },
+    }
+    require('lspconfig').jdtls.setup {
+
+      settings = {
+        java = {
+          configuration = {
+            runtimes = {
+              {
+                name = 'JavaSE-21',
+                path = 'C:/dev/installs/java/jdk-21.0.2',
+                default = false,
+              },
+              {
+                name = 'JavaSE-17',
+                path = 'C:/dev/installs/java/jdk-17.0.2',
+                default = true,
+              },
+            },
+          },
+        },
       },
     }
   end,

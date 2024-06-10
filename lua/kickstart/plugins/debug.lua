@@ -1,4 +1,3 @@
--- debug.lua
 --
 -- Shows how to use the DAP plugin to debug your code.
 --
@@ -50,6 +49,9 @@ return {
       ensure_installed = {
         -- Update this to ensure that you have the debuggers for the langs you want
         'delve',
+        'javadbg',
+        'javatest',
+        'jdtls',
       },
     }
 
@@ -111,4 +113,3 @@ return {
 }
 
 -- vim: ts=2 sts=2 sw=2 et
-
